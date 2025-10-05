@@ -26,6 +26,18 @@ class DirectionsTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'name' => '«Программная инженерия»',
+                'number' => '230100.62',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => '«Информационная безопасность»',
+                'number' => '090900.62',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }

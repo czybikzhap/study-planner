@@ -49,5 +49,47 @@ class ProfilesTableSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ]);
+
+        DB::table('profiles')->insert([
+            [
+                'name' => 'Веб-разработка',
+                'direction_id' => 3,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Мобильная разработка',
+                'direction_id' => 3,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Data Science',
+                'direction_id' => 3,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        DB::table('profiles')->insert([
+            [
+                'name' => 'Кибербезопасность',
+                'direction_id' => 4,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Криптография',
+                'direction_id' => 4,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Защита информации',
+                'direction_id' => 4,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
     }
 }
