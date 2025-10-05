@@ -577,12 +577,12 @@
         saveButton.textContent = 'Сохранение...';
         saveButton.disabled = true;
 
-        fetch('/priorities/save', {
+        fetch('http://localhost:8085/api/priorities/save', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'X-Requested-With': 'XMLHttpRequest'
+                'Accept': 'application/json',
+
             },
             body: JSON.stringify(priorities)
         })

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTO\SavePrioritiesDTO;
 use App\Models\Direction;
+use App\Models\Profile;
 use App\Models\UserDirection;
 use App\Models\UserProfile;
 use Illuminate\Support\Facades\DB;
@@ -25,42 +26,91 @@ class PriorityService
 
             $this->deleteUserPriorities($dto->userId);
 
-            $savedDirections = $this->saveDirectionsPriorities($dto);
-            $savedProfiles = $this->saveProfilesPriorities($dto);
+            $savedDirectionsCount = $this->saveDirectionsPriorities($dto);
+            $savedProfilesCount = $this->saveProfilesPriorities($dto);
+
+            $directionDetails = $this->getSavedDirectionDetails($dto);
+            $profileDetails = $this->getSavedProfileDetails($dto);
 
             DB::commit();
 
-            Log::info('User priorities saved successfully', [
-                'user_id' => $dto->userId,
-                'directions_count' => $savedDirections,
-                'profiles_count' => $savedProfiles
-            ]);
-
             return [
                 'success' => true,
-                'saved_directions' => $savedDirections,
-                'saved_profiles' => $savedProfiles
+                'saved_directions' => $savedDirectionsCount,
+                'saved_profiles' => $savedProfilesCount,
+                'user_id' => $dto->userId,
+                'timestamp' => now()->toDateTimeString(),
+                'saved_direction_details' => $directionDetails,
+                'saved_profile_details' => $profileDetails,
             ];
 
         } catch (\Exception $e) {
             DB::rollBack();
-
-            Log::error('Error saving user priorities', [
-                'user_id' => $dto->userId,
-                'error' => $e->getMessage()
-            ]);
-
             throw $e;
         }
     }
 
-    // Старый метод для обратной совместимости (можно удалить позже)
-    public function saveUserPrioritiesOld(int $userId, array $data): array
+    private function getSavedDirectionDetails(SavePrioritiesDTO $dto): array
     {
-        $dto = SavePrioritiesDTO::fromRequest($data, $userId);
-        return $this->saveUserPriorities($dto);
+        $directionsArray = json_decode(json_encode($dto->directions), true);
+
+        $details = [];
+        foreach ($directionsArray as $directionData) {
+            $direction = Direction::with('profiles')->find($directionData['id']);
+            if ($direction) {
+                $direction->setAttribute('saved_priority', $directionData['priority']);
+                $direction->setAttribute('saved_user_id', $dto->userId);
+                $direction->setAttribute('saved_created_at', now());
+                $direction->setAttribute('saved_updated_at', now());
+
+                if ($direction->profiles) {
+                    foreach ($direction->profiles as $profile) {
+                        $profilePriority = $this->findProfilePriority($directionData['profiles'], $profile->id);
+                        $profile->setAttribute('saved_priority', $profilePriority);
+                        $profile->setAttribute('saved_user_id', $dto->userId);
+                    }
+                }
+
+                $details[] = $direction;
+            }
+        }
+        return $details;
     }
 
+    private function getSavedProfileDetails(SavePrioritiesDTO $dto): array
+    {
+        $directionsArray = json_decode(json_encode($dto->directions), true);
+
+        $details = [];
+        foreach ($directionsArray as $directionData) {
+            foreach ($directionData['profiles'] as $profileData) {
+                $profile = Profile::with('direction')->find($profileData['id']);
+                if ($profile) {
+
+                    $profile->setAttribute('saved_priority', $profileData['priority']);
+                    $profile->setAttribute('saved_user_id', $dto->userId);
+                    $profile->setAttribute('saved_created_at', now());
+                    $profile->setAttribute('saved_updated_at', now());
+
+                    $details[] = $profile;
+                }
+            }
+        }
+        return $details;
+    }
+
+    /**
+     * Находит приоритет профиля в массиве отправленных данных
+     */
+    private function findProfilePriority(array $profiles, int $profileId): ?int
+    {
+        foreach ($profiles as $profile) {
+            if ($profile['id'] == $profileId) {
+                return $profile['priority'];
+            }
+        }
+        return null;
+    }
     private function deleteUserPriorities(int $userId): void
     {
         UserDirection::where('user_id', $userId)->delete();
@@ -119,18 +169,5 @@ class PriorityService
         return $savedCount;
     }
 
-    public function getUserPriorities(int $userId)
-    {
-        return [
-            'directions' => UserDirection::with('direction')
-                ->where('user_id', $userId)
-                ->orderBy('priority')
-                ->get(),
-            'profiles' => UserProfile::with('profile')
-                ->where('user_id', $userId)
-                ->orderBy('priority')
-                ->get()
-        ];
-    }
 
 }
