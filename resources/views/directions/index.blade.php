@@ -253,17 +253,11 @@
 <div class="container">
     <div class="header">
         <h1>Выбор направлений обучения</h1>
-        <p>Выберите до <span class="max-selection">3</span> направлений и расставьте приоритеты</p>
+        <p>Выберите направления и расставьте приоритеты</p>
     </div>
 
     <div class="directions-container">
-        <!-- Блок информации о выборе -->
-        <div class="selection-info" id="selectionInfo">
-            <div>Выбрано: <span class="selected-count" id="selectedCount">0</span> из <span class="max-selection">3</span> направлений</div>
-            <div style="font-size: 0.9rem; margin-top: 5px; color: #64748b;">
-                Нажмите на направление, чтобы открыть список профилей
-            </div>
-        </div>
+        <!-- Блок информации о выборе УДАЛЕН -->
 
         <!-- Выбранные направления (для приоритизации) -->
         <div id="selectedDirectionsContainer">
@@ -285,12 +279,9 @@
 </div>
 
 <script>
-
     console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-    // Конфигурация
-    const MAX_SELECTIONS = 3;
 
-    // Способ 2: Используем toJson() из Laravel
+    // Убрано ограничение MAX_SELECTIONS
     let directionsData = {!! $directions->toJson() !!};
     directionsData = directionsData.map(direction => ({
         ...direction,
@@ -302,7 +293,6 @@
     // Инициализация при загрузке страницы
     document.addEventListener('DOMContentLoaded', function() {
         renderAllDirections();
-        updateSelectionInfo();
     });
 
     // Общий рендер всех направлений
@@ -362,22 +352,19 @@
         }
 
         container.innerHTML = availableDirections.map(direction => `
-                <div class="direction ${getSelectedCount() >= MAX_SELECTIONS ? 'disabled' : ''}" data-direction-id="${direction.id}">
+                <div class="direction" data-direction-id="${direction.id}">
                     <div class="direction-header" onclick="toggleAvailableDirection(${direction.id})">
                         <div class="direction-title">
                             <input
                                 type="checkbox"
                                 class="direction-checkbox"
-                                ${getSelectedCount() >= MAX_SELECTIONS ? 'disabled' : ''}
                                 onchange="toggleDirectionSelection(${direction.id}, this.checked)"
                                 ${direction.isSelected ? 'checked' : ''}
                             >
                             ${direction.name} (${direction.number})
                         </div>
                         <div class="direction-actions">
-                            <button class="btn btn-add btn-small"
-                                ${getSelectedCount() >= MAX_SELECTIONS ? 'disabled' : ''}
-                                onclick="event.stopPropagation(); selectDirection(${direction.id})">
+                            <button class="btn btn-add btn-small" onclick="event.stopPropagation(); selectDirection(${direction.id})">
                                 Добавить
                             </button>
                         </div>
@@ -415,44 +402,12 @@
         return directionsData.filter(d => d.isSelected).length;
     }
 
-    function updateSelectionInfo() {
-        const selectedCount = getSelectedCount();
-        const countElement = document.getElementById('selectedCount');
-        const infoElement = document.getElementById('selectionInfo');
-
-        countElement.textContent = selectedCount;
-
-        if (selectedCount >= MAX_SELECTIONS) {
-            infoElement.classList.add('warning');
-            infoElement.innerHTML = `
-                    <div>Достигнут лимит: <span class="selected-count">${selectedCount}</span> из <span class="max-selection">${MAX_SELECTIONS}</span> направлений</div>
-                    <div style="font-size: 0.9rem; margin-top: 5px; color: #dc2626;">
-                        Для выбора нового направления удалите одно из выбранных
-                    </div>
-                `;
-        } else {
-            infoElement.classList.remove('warning');
-            infoElement.innerHTML = `
-                    <div>Выбрано: <span class="selected-count">${selectedCount}</span> из <span class="max-selection">${MAX_SELECTIONS}</span> направлений</div>
-                    <div style="font-size: 0.9rem; margin-top: 5px; color: #64748b;">
-                        Нажмите на направление, чтобы открыть список профилей
-                    </div>
-                `;
-        }
-    }
-
     function selectDirection(directionId) {
-        if (getSelectedCount() >= MAX_SELECTIONS) {
-            alert(`Можно выбрать не более ${MAX_SELECTIONS} направлений`);
-            return;
-        }
-
         const direction = directionsData.find(d => d.id === directionId);
         if (direction) {
             direction.isSelected = true;
             direction.isOpen = false; // Закрываем при добавлении
             renderAllDirections();
-            updateSelectionInfo();
         }
     }
 
@@ -462,22 +417,15 @@
             direction.isSelected = false;
             direction.isOpen = false; // Закрываем при удалении
             renderAllDirections();
-            updateSelectionInfo();
         }
     }
 
     function toggleDirectionSelection(directionId, isSelected) {
-        if (isSelected && getSelectedCount() >= MAX_SELECTIONS) {
-            alert(`Можно выбрать не более ${MAX_SELECTIONS} направлений`);
-            return false;
-        }
-
         const direction = directionsData.find(d => d.id === directionId);
         if (direction) {
             direction.isSelected = isSelected;
             direction.isOpen = false; // Закрываем при изменении выбора
             renderAllDirections();
-            updateSelectionInfo();
         }
     }
 
@@ -582,7 +530,6 @@
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-
             },
             body: JSON.stringify(priorities)
         })

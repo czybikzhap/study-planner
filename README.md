@@ -1,4 +1,6 @@
-/**
+![Скриншот интерфейса](images/img.png)
+
+
 * # 📖 Directions and Profiles Web and API (Laravel 12)
 
 * Web для направлений и профилей 
