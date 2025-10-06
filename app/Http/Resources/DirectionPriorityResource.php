@@ -14,25 +14,32 @@ class DirectionPriorityResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $pivot = optional($this->users->first()?->pivot);
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'number' => $this->number,
-            'priority' => $this->saved_priority ?? $this->getAttribute('saved_priority'),
-            'user_id' => $this->saved_user_id ?? $this->getAttribute('saved_user_id'),
-            'created_at' => $this->saved_created_at ?? $this->getAttribute('saved_created_at'),
-            'updated_at' => $this->saved_updated_at ?? $this->getAttribute('saved_updated_at'),
+            'priority' => $pivot->priority,
+            'user_id' => $pivot->user_id,
+            'created_at' => $pivot->created_at,
+            'updated_at' => $pivot->updated_at,
 
-            'profiles' => $this->when($this->profiles, function () {
+            // Профили внутри направления
+            'profiles' => $this->whenLoaded('profiles', function () {
                 return $this->profiles->map(function ($profile) {
+                    $pivot = optional($profile->users->first()?->pivot);
+
                     return [
                         'id' => $profile->id,
                         'name' => $profile->name,
-                        'priority' => $profile->saved_priority ?? $profile->getAttribute('saved_priority'),
-                        'user_id' => $profile->saved_user_id ?? $profile->getAttribute('saved_user_id'),
+                        'priority' => $pivot->priority,
+                        'user_id' => $pivot->user_id,
+                        'created_at' => $pivot->created_at,
+                        'updated_at' => $pivot->updated_at,
                     ];
                 });
-            }, []),
+            }),
         ];
     }
 }

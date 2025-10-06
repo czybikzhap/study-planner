@@ -27,10 +27,9 @@ class Direction extends Model
     /**
      * Пользователи, связанные с направлением
      */
-    public function users(): BelongsToMany
+    public function users()
     {
         return $this->belongsToMany(User::class, 'user_directions')
-            ->withPivot('priority')
-            ->withTimestamps();
+            ->withPivot(['priority', 'created_at', 'updated_at']);
     }
 }

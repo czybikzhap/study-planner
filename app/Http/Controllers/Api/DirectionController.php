@@ -20,27 +20,12 @@ class DirectionController
     public function savePriorities(SavePrioritiesRequest $request): JsonResponse
     {
         $data = $request->validated();
+        $userId = 1;
 
-        try {
-            $userId = 1;
+        $dto = SavePrioritiesDTO::fromRequest($data, $userId);
+        $result = $this->priorityService->saveUserPriorities($dto);
 
-            $dto = SavePrioritiesDTO::fromRequest($data, $userId);
-            $result = $this->priorityService->saveUserPriorities($dto);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Приоритеты сохранены!',
-                'data' => new PrioritySaveResource($result)
-            ]);
-
-        } catch (\Exception $e) {
-            logger()->error('Save error: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка сохранения: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json(new PrioritySaveResource($result));
     }
 
 

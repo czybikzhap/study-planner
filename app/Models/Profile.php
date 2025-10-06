@@ -27,10 +27,10 @@ class Profile extends Model
     /**
      * Пользователи, связанные с профилем
      */
-    public function users(): BelongsToMany
+    public function users()
     {
         return $this->belongsToMany(User::class, 'user_profiles')
-            ->withPivot('priority')
+            ->withPivot('priority', 'created_at', 'updated_at')
             ->withTimestamps();
     }
 }

@@ -14,7 +14,6 @@ class ProfileBelongsToDirection implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        // Проверяем, что профиль принадлежит направлению
         $profileExists = Profile::where('id', $value)
             ->where('direction_id', $this->directionId)
             ->exists();

@@ -14,16 +14,17 @@ class ProfilePriorityResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $pivot = optional($this->users->first()?->pivot);
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'direction_id' => $this->direction_id,
-            'priority' => $this->pivot->priority ?? $this->priority,
-            'user_id' => $this->pivot->user_id ?? null,
-            'created_at' => $this->pivot->created_at ?? null,
-            'updated_at' => $this->pivot->updated_at ?? null,
+            'priority' => $pivot->priority,
+            'user_id' => $pivot->user_id,
+            'created_at' => $pivot->created_at,
+            'updated_at' => $pivot->updated_at,
 
-            // Информация о направлении, если нужно
             'direction' => $this->whenLoaded('direction', function () {
                 return [
                     'id' => $this->direction->id,
