@@ -525,7 +525,7 @@
         saveButton.textContent = 'Сохранение...';
         saveButton.disabled = true;
 
-        fetch('http://localhost:8085/api/priorities/save', {
+        fetch('http://5.129.204.33/api/priorities/save', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
