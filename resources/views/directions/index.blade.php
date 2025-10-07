@@ -257,18 +257,11 @@
     </div>
 
     <div class="directions-container">
-        <!-- Блок информации о выборе УДАЛЕН -->
-
-        <!-- Выбранные направления (для приоритизации) -->
         <div id="selectedDirectionsContainer">
-            <!-- Выбранные направления будут здесь -->
         </div>
-
-        <!-- Доступные направления (для выбора) -->
         <div class="available-directions">
             <h3 style="margin-bottom: 15px; color: #374151;">Доступные направления</h3>
             <div id="availableDirectionsContainer">
-                <!-- Невыбранные направления будут здесь -->
             </div>
         </div>
     </div>
@@ -281,7 +274,6 @@
 <script>
     console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
 
-    // Убрано ограничение MAX_SELECTIONS
     let directionsData = {!! $directions->toJson() !!};
     directionsData = directionsData.map(direction => ({
         ...direction,
@@ -525,11 +517,10 @@
         saveButton.textContent = 'Сохранение...';
         saveButton.disabled = true;
 
-        fetch('http://5.129.204.33/api/priorities/save', {
+        fetch('/api/priorities/save', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json',
             },
